@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const SwapRequestForm = ({ onClose, targetUser }) => {
   const navigate = useNavigate();
@@ -12,10 +13,15 @@ const SwapRequestForm = ({ onClose, targetUser }) => {
   const [targetWantedSkills, setTargetWantedSkills] = useState([]);
 
   useEffect(() => {
-    // Fetch logged-in user's skills (placeholder)
-    setUserSkills(['Graphic Design', 'Photoshop', 'Video Editing']);
-    // Fetch target user's wanted skills (placeholder from targetUser prop)
-    setTargetWantedSkills(targetUser.skillsWanted || ['Python', 'Java Script']);
+    const fetchSkills = async () => {
+      const token = localStorage.getItem('token');
+      const userRes = await axios.get('http://localhost:5000/api/users/profile', {
+        headers: { 'x-auth-token': token }
+      });
+      setUserSkills(userRes.data.skillsOffered || []);
+      setTargetWantedSkills(targetUser.skillsWanted || []);
+    };
+    fetchSkills();
   }, [targetUser]);
 
   const handleChange = (e) => {
@@ -23,11 +29,16 @@ const SwapRequestForm = ({ onClose, targetUser }) => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Request submitted:\nSkill Offered: ${formData.skillOffered}\nSkill Wanted: ${formData.skillWanted}\nMessage: ${formData.message}`);
-    onClose(); // Close the form (navigate back or hide)
-    navigate('/swap-request'); // Placeholder for Swap Request Dashboard
+    const token = localStorage.getItem('token');
+    await axios.post('http://localhost:5000/api/swap-requests', {
+      ...formData,
+      recipientId: targetUser._id
+    }, { headers: { 'x-auth-token': token } });
+    alert('Request submitted!');
+    onClose();
+    navigate('/swap-request');
   };
 
   return (

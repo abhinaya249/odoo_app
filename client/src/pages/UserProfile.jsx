@@ -1,51 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const UserProfile = () => {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState({
-    name: '',
-    location: '',
-    skillsOffered: [],
-    skillsWanted: [],
-    availability: [],
-    isPublic: true,
-    profilePhoto: ''
-  });
-  const [editedProfile, setEditedProfile] = useState({ ...profile });
+  const [profile, setProfile] = useState({});
+  const [editedProfile, setEditedProfile] = useState({});
   const [photoUrl, setPhotoUrl] = useState('');
 
   useEffect(() => {
-    // Fetch user profile data from backend (placeholder)
-    setEditedProfile({
-      name: 'Marc Demo',
-      location: 'New York',
-      skillsOffered: ['Graphic Design', 'Photoshop', 'Video Editing'],
-      skillsWanted: ['Python', 'Java Script'],
-      availability: ['weekends'],
-      isPublic: true,
-      profilePhoto: ''
-    });
-    setPhotoUrl(''); // Placeholder for photo URL
+    const fetchProfile = async () => {
+      const token = localStorage.getItem('token');
+      const res = await axios.get('http://localhost:5000/api/users/profile', {
+        headers: { 'x-auth-token': token }
+      });
+      setProfile(res.data);
+      setEditedProfile(res.data);
+      setPhotoUrl(res.data.profilePhoto || '');
+    };
+    fetchProfile();
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditedProfile({ ...editedProfile, [name]: value });
+    setEditedProfile({ ...editedProfile, [e.target.name]: e.target.value });
   };
 
   const handleSkillChange = (field, value) => {
     setEditedProfile({ ...editedProfile, [field]: value.split(',').map(s => s.trim()) });
-  };
-
-  const addSkill = (field, skill) => {
-    if (skill && !editedProfile[field].includes(skill)) {
-      setEditedProfile({ ...editedProfile, [field]: [...editedProfile[field], skill] });
-    }
-  };
-
-  const removeSkill = (field, skill) => {
-    setEditedProfile({ ...editedProfile, [field]: editedProfile[field].filter(s => s !== skill) });
   };
 
   const handleAvailabilityChange = (e) => {
@@ -61,12 +42,15 @@ const UserProfile = () => {
   const handlePhotoAction = (action) => {
     if (action === 'add') setPhotoUrl(prompt('Enter photo URL') || '');
     if (action === 'remove') setPhotoUrl('');
-    // Edit logic can be expanded with a file picker or URL update
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    const token = localStorage.getItem('token');
+    await axios.put('http://localhost:5000/api/users/profile', editedProfile, {
+      headers: { 'x-auth-token': token }
+    });
     setProfile(editedProfile);
-    alert('Profile saved!'); // Placeholder for backend save
+    alert('Profile saved!');
   };
 
   const handleDiscard = () => {
@@ -75,7 +59,7 @@ const UserProfile = () => {
   };
 
   const handleSwapRequest = () => {
-    alert('Swap request page to be added soon!');
+    navigate('/detailed-profile');
   };
 
   const handleHome = () => {
@@ -99,34 +83,34 @@ const UserProfile = () => {
         <div style={{ flex: 1 }}>
           <div style={{ marginBottom: '20px' }}>
             <label>Name</label>
-            <input name="name" value={editedProfile.name} onChange={handleChange} style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', width: '200px', marginLeft: '10px' }} />
+            <input name="name" value={editedProfile.name || ''} onChange={handleChange} style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', width: '200px', marginLeft: '10px' }} />
           </div>
           <div style={{ marginBottom: '20px' }}>
             <label>Location</label>
-            <input name="location" value={editedProfile.location} onChange={handleChange} style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', width: '200px', marginLeft: '10px' }} />
+            <input name="location" value={editedProfile.location || ''} onChange={handleChange} style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', width: '200px', marginLeft: '10px' }} />
           </div>
           <div style={{ marginBottom: '20px' }}>
             <label>Skills Offered</label>
-            {editedProfile.skillsOffered.map((skill, index) => (
+            {(editedProfile.skillsOffered || []).map((skill, index) => (
               <span key={index} style={{ border: '2px solid #FFFFFF', borderRadius: '15px', padding: '5px 10px', margin: '0 5px', background: '#000000', color: '#00FF00' }}>
-                {skill} <button onClick={() => removeSkill('skillsOffered', skill)} style={{ color: '#FF0000', border: 'none', background: 'none', cursor: 'pointer' }}>X</button>
+                {skill}
               </span>
             ))}
             <input
-              value={editedProfile.skillsOffered.join(', ')}
+              value={(editedProfile.skillsOffered || []).join(', ') || ''}
               onChange={(e) => handleSkillChange('skillsOffered', e.target.value)}
               style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', width: '200px', marginLeft: '10px' }}
             />
           </div>
           <div style={{ marginBottom: '20px' }}>
             <label>Skills Wanted</label>
-            {editedProfile.skillsWanted.map((skill, index) => (
+            {(editedProfile.skillsWanted || []).map((skill, index) => (
               <span key={index} style={{ border: '2px solid #FFFFFF', borderRadius: '15px', padding: '5px 10px', margin: '0 5px', background: '#000000', color: '#0000FF' }}>
-                {skill} <button onClick={() => removeSkill('skillsWanted', skill)} style={{ color: '#FF0000', border: 'none', background: 'none', cursor: 'pointer' }}>X</button>
+                {skill}
               </span>
             ))}
             <input
-              value={editedProfile.skillsWanted.join(', ')}
+              value={(editedProfile.skillsWanted || []).join(', ') || ''}
               onChange={(e) => handleSkillChange('skillsWanted', e.target.value)}
               style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', width: '200px', marginLeft: '10px' }}
             />
@@ -138,7 +122,7 @@ const UserProfile = () => {
                 <input
                   type="checkbox"
                   value={day}
-                  checked={editedProfile.availability.includes(day)}
+                  checked={(editedProfile.availability || []).includes(day)}
                   onChange={handleAvailabilityChange}
                 /> {day}
               </label>
@@ -146,7 +130,7 @@ const UserProfile = () => {
           </div>
           <div>
             <label>Profile</label>
-            <select name="isPublic" value={editedProfile.isPublic} onChange={handleChange} style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', marginLeft: '10px' }}>
+            <select name="isPublic" value={editedProfile.isPublic || true} onChange={handleChange} style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', marginLeft: '10px' }}>
               <option value={true}>Public</option>
               <option value={false}>Private</option>
             </select>

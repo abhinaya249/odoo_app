@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 import SwapRequestForm from './SwapRequestForm';
 
 const DetailedUserProfile = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [user, setUser] = useState({});
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [rating, setRating] = useState(0);
   const [showRequestForm, setShowRequestForm] = useState(false);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const res = await axios.get(`http://localhost:5000/api/users/${id}`);
+      setUser(res.data);
+    };
+    fetchUser();
+  }, [id]);
 
   const handleHome = () => {
     navigate('/');
@@ -36,11 +47,6 @@ const DetailedUserProfile = () => {
     setShowRequestForm(false);
   };
 
-  const targetUser = {
-    name: 'Marc Demo',
-    skillsWanted: ['Python', 'Java Script']
-  };
-
   return (
     <div style={{ background: '#000000', padding: '20px', border: '2px solid #FFFFFF', borderRadius: '10px', color: '#FFFFFF', textAlign: 'center' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -51,7 +57,7 @@ const DetailedUserProfile = () => {
           <div style={{ display: 'inline-block', background: '#800080', width: '40px', height: '40px', borderRadius: '50%', marginLeft: '10px' }}></div>
         </div>
       </div>
-      <h3>Marc Demo</h3>
+      <h3>{user.name}</h3>
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
         <div style={{ background: '#CCCCCC', width: '100px', height: '100px', borderRadius: '50%', marginRight: '20px' }}></div>
       </div>
@@ -88,7 +94,7 @@ const DetailedUserProfile = () => {
       >
         Request
       </button>
-      {showRequestForm && <SwapRequestForm onClose={closeRequestForm} targetUser={targetUser} />}
+      {showRequestForm && <SwapRequestForm onClose={closeRequestForm} targetUser={user} />}
     </div>
   );
 };

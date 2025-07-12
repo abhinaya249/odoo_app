@@ -1,19 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const SwapRequestDashboard = () => {
   const navigate = useNavigate();
-  const [requests, setRequests] = useState([
-    { id: 1, name: 'Marc Demo', skillsOffered: ['Java Script'], skillsWanted: ['Photoshop'], rating: 3.4, status: 'Pending' },
-    { id: 2, name: 'John Doe', skillsOffered: ['Python'], skillsWanted: ['Graphic Design'], rating: 3.4, status: 'Rejected' },
-  ]);
-  const [filteredRequests, setFilteredRequests] = useState([...requests]);
+  const [requests, setRequests] = useState([]);
+  const [filteredRequests, setFilteredRequests] = useState([]);
   const [statusFilter, setStatusFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    const fetchRequests = async () => {
+      const token = localStorage.getItem('token');
+      const res = await axios.get('http://localhost:5000/api/swap-requests', {
+        headers: { 'x-auth-token': token },
+        params: { status: statusFilter !== 'All' ? statusFilter : undefined }
+      });
+      setRequests(res.data);
+      setFilteredRequests(res.data);
+    };
+    fetchRequests();
+  }, [statusFilter]);
+
+  useEffect(() => {
     filterRequests();
-  }, [statusFilter, searchTerm, requests]);
+  }, [searchTerm, requests]);
 
   const handleProfile = () => {
     navigate('/profile');
@@ -29,21 +40,26 @@ const SwapRequestDashboard = () => {
 
   const filterRequests = () => {
     let filtered = [...requests];
-    if (statusFilter !== 'All') {
-      filtered = filtered.filter(req => req.status === statusFilter);
-    }
     if (searchTerm) {
-      filtered = filtered.filter(req => req.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      filtered = filtered.filter(req => req.requester.name.toLowerCase().includes(searchTerm.toLowerCase()) || req.recipient.name.toLowerCase().includes(searchTerm.toLowerCase()));
     }
     setFilteredRequests(filtered);
   };
 
-  const handleAccept = (id) => {
-    setRequests(requests.map(req => req.id === id ? { ...req, status: 'Accepted' } : req));
+  const handleAccept = async (id) => {
+    const token = localStorage.getItem('token');
+    await axios.put(`http://localhost:5000/api/swap-requests/${id}`, { status: 'Accepted' }, {
+      headers: { 'x-auth-token': token }
+    });
+    setRequests(requests.map(req => req._id === id ? { ...req, status: 'Accepted' } : req));
   };
 
-  const handleReject = (id) => {
-    setRequests(requests.map(req => req.id === id ? { ...req, status: 'Rejected' } : req));
+  const handleReject = async (id) => {
+    const token = localStorage.getItem('token');
+    await axios.put(`http://localhost:5000/api/swap-requests/${id}`, { status: 'Rejected' }, {
+      headers: { 'x-auth-token': token }
+    });
+    setRequests(requests.map(req => req._id === id ? { ...req, status: 'Rejected' } : req));
   };
 
   return (
@@ -69,14 +85,14 @@ const SwapRequestDashboard = () => {
         <div style={{ background: '#800080', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer' }} onClick={handleProfile}></div>
       </div>
       {filteredRequests.map((req) => (
-        <div key={req.id} style={{ border: '2px solid #FFFFFF', padding: '10px', borderRadius: '10px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div key={req._id} style={{ border: '2px solid #FFFFFF', padding: '10px', borderRadius: '10px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div style={{ background: '#CCCCCC', width: '80px', height: '80px', borderRadius: '50%', marginRight: '20px' }}></div>
             <div>
-              <h4 style={{ margin: '0 0 10px' }}>{req.name}</h4>
-              <p style={{ color: '#00FF00', margin: '0' }}>Skills Offered: {req.skillsOffered.join(', ')}</p>
-              <p style={{ color: '#0000FF', margin: '5px 0' }}>Skill Wanted: {req.skillsWanted.join(', ')}</p>
-              <p style={{ margin: '5px 0' }}>rating {req.rating}/5</p>
+              <h4 style={{ margin: '0 0 10px' }}>{req.requester.name}</h4>
+              <p style={{ color: '#00FF00', margin: '0' }}>Skills Offered: {req.skillOffered}</p>
+              <p style={{ color: '#0000FF', margin: '5px 0' }}>Skill Wanted: {req.skillWanted}</p>
+              <p style={{ margin: '5px 0' }}>rating {req.requester.rating || 0}/5</p>
             </div>
           </div>
           <div>
@@ -85,13 +101,13 @@ const SwapRequestDashboard = () => {
               <div>
                 <button
                   style={{ background: '#00FF00', color: '#FFFFFF', border: '2px solid #FFFFFF', padding: '5px 15px', borderRadius: '5px', marginRight: '10px' }}
-                  onClick={() => handleAccept(req.id)}
+                  onClick={() => handleAccept(req._id)}
                 >
                   Accept
                 </button>
                 <button
                   style={{ background: '#FF0000', color: '#FFFFFF', border: '2px solid #FFFFFF', padding: '5px 15px', borderRadius: '5px' }}
-                  onClick={() => handleReject(req.id)}
+                  onClick={() => handleReject(req._id)}
                 >
                   Reject
                 </button>

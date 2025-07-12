@@ -1,66 +1,34 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
 
-  const handleLogin = () => {
-    setMessage('Login successfully');
-    setTimeout(() => setMessage(''), 5000); // Display message for 5 seconds
+  const handleChange = (e) => {
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
-  const handleHomeClick = () => {
-    navigate('/');
-  };
-
-  const handleSignupClick = () => {
-    navigate('/signup');
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post('http://localhost:5000/api/auth/login', credentials);
+      localStorage.setItem('token', res.data.token);
+      navigate('/profile');
+    } catch (err) {
+      alert('Login failed');
+    }
   };
 
   return (
-    <div style={{ background: '#000000', padding: '20px', border: '2px solid #FFFFFF', borderRadius: '10px', color: '#FFFFFF', textAlign: 'center' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1 style={{ margin: '0' }}>Skill Swap Platform</h1>
-        <button
-          style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', padding: '5px 15px', borderRadius: '15px' }}
-          onClick={handleHomeClick}
-        >
-          Home
-        </button>
-      </div>
-      <div>
-        <label>Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', padding: '5px', margin: '10px 0', display: 'block', width: '200px', marginLeft: 'auto', marginRight: 'auto' }}
-        />
-        <label>Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', padding: '5px', margin: '10px 0', display: 'block', width: '200px', marginLeft: 'auto', marginRight: 'auto' }}
-        />
-        <button
-          style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', padding: '5px 15px', borderRadius: '15px', margin: '10px' }}
-          onClick={handleLogin}
-        >
-          Login
-        </button>
-        <a href="#" style={{ color: '#0000FF', fontSize: '14px', margin: '10px' }}>Forgot username/password</a>
-        <button
-          style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', padding: '5px 15px', borderRadius: '15px', margin: '10px' }}
-          onClick={handleSignupClick}
-        >
-          Signup
-        </button>
-      </div>
-      {message && <p style={{ color: '#00FF00', marginTop: '10px' }}>{message}</p>}
+    <div style={{ background: '#000000', color: '#FFFFFF', padding: '20px' }}>
+      <h2>Login</h2>
+      <form onSubmit={handleLogin}>
+        <input name="email" value={credentials.email} onChange={handleChange} placeholder="Email" />
+        <input name="password" type="password" value={credentials.password} onChange={handleChange} placeholder="Password" />
+        <button type="submit">Login</button>
+      </form>
     </div>
   );
 };
