@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const LoginPage = () => {
+const SignupPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleLogin = () => {
-    setMessage('Login successfully');
-    setTimeout(() => setMessage(''), 5000); // Display message for 5 seconds
+  const handleSignup = () => {
+    if (password !== confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
+    alert('Signup successful! (Backend to be added)');
+    navigate('/');
   };
 
   const handleHomeClick = () => {
     navigate('/');
-  };
-
-  const handleSignupClick = () => {
-    navigate('/signup');
   };
 
   return (
@@ -39,6 +40,13 @@ const LoginPage = () => {
           onChange={(e) => setEmail(e.target.value)}
           style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', padding: '5px', margin: '10px 0', display: 'block', width: '200px', marginLeft: 'auto', marginRight: 'auto' }}
         />
+        <label>Name</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', padding: '5px', margin: '10px 0', display: 'block', width: '200px', marginLeft: 'auto', marginRight: 'auto' }}
+        />
         <label>Password</label>
         <input
           type="password"
@@ -46,23 +54,22 @@ const LoginPage = () => {
           onChange={(e) => setPassword(e.target.value)}
           style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', padding: '5px', margin: '10px 0', display: 'block', width: '200px', marginLeft: 'auto', marginRight: 'auto' }}
         />
+        <label>Confirm Password</label>
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', padding: '5px', margin: '10px 0', display: 'block', width: '200px', marginLeft: 'auto', marginRight: 'auto' }}
+        />
         <button
           style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', padding: '5px 15px', borderRadius: '15px', margin: '10px' }}
-          onClick={handleLogin}
-        >
-          Login
-        </button>
-        <a href="#" style={{ color: '#0000FF', fontSize: '14px', margin: '10px' }}>Forgot username/password</a>
-        <button
-          style={{ border: '2px solid #FFFFFF', background: '#000000', color: '#FFFFFF', padding: '5px 15px', borderRadius: '15px', margin: '10px' }}
-          onClick={handleSignupClick}
+          onClick={handleSignup}
         >
           Signup
         </button>
       </div>
-      {message && <p style={{ color: '#00FF00', marginTop: '10px' }}>{message}</p>}
     </div>
   );
 };
 
-export default LoginPage;
+export default SignupPage;
