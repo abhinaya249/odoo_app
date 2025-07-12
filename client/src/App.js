@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import UserProfile from './pages/UserProfile';
 import DetailedUserProfile from './pages/DetailedUserProfile';
+import SwapRequestDashboard from './pages/SwapRequestDashboard';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/detailed-profile" element={<DetailedUserProfile />} />
+          <Route path="/swap-request" element={<SwapRequestDashboard />} />
         </Routes>
       </div>
     </Router>

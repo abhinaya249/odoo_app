@@ -14,7 +14,7 @@ const DetailedUserProfile = () => {
   };
 
   const handleSwapRequest = () => {
-    alert('Swap request page to be added soon!');
+    navigate('/swap-request');
   };
 
   const handleRatingFeedback = () => {
