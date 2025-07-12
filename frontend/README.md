@@ -54,20 +54,18 @@ README.md → Project documentation
 ### 👑 Team Leader
 - **Name:** Chakka Teja Abhinaya Sri  
 - **Email:** tejaabhinayasrichakka@gmail.com  
-- **Phone:** 7013300157  
+ 
 
 ### 👥 Team Members
 - **Pulakhandam Pavitra Laxmi**  
   Email: pavitralaxmi123456@gmail.com  
-  Phone: 8008195731
+
 
 - **Madinidi Sravana Sandhya**  
   Email: mssandhya.10@gmail.com  
-  Phone: 7780141623
 
 - **Athota Vinuthna Sneha**  
   Email: n210049@rguktn.ac.in  
-  Phone: 7989048057
 
 ## 💡 Future Scope
 - Chat feature for real-time communication
