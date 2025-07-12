@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import SwapRequestForm from './SwapRequestForm';
 
 const DetailedUserProfile = () => {
   const navigate = useNavigate();
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [rating, setRating] = useState(0);
+  const [showRequestForm, setShowRequestForm] = useState(false);
 
   const handleHome = () => {
     navigate('/');
@@ -13,7 +15,6 @@ const DetailedUserProfile = () => {
 
   const handleSwapRequest = () => {
     alert('Swap request page to be added soon!');
-    // Placeholder for future navigation to /swap-request
   };
 
   const handleRatingFeedback = () => {
@@ -28,7 +29,16 @@ const DetailedUserProfile = () => {
   };
 
   const handleRequest = () => {
-    navigate('/request'); // Placeholder for future request page
+    setShowRequestForm(true);
+  };
+
+  const closeRequestForm = () => {
+    setShowRequestForm(false);
+  };
+
+  const targetUser = {
+    name: 'Marc Demo',
+    skillsWanted: ['Python', 'Java Script']
   };
 
   return (
@@ -78,6 +88,7 @@ const DetailedUserProfile = () => {
       >
         Request
       </button>
+      {showRequestForm && <SwapRequestForm onClose={closeRequestForm} targetUser={targetUser} />}
     </div>
   );
 };
