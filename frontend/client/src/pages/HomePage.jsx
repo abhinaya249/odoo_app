@@ -6,29 +6,25 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [error, setError] = useState(null);
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const headers = token ? { 'x-auth-token': token } : {};
-        const res = await axios.get('http://10.4.1.43:5000/api/users', { headers });
-        if (res.data && Array.isArray(res.data)) {
+    if (token) {
+      const fetchUsers = async () => {
+        try {
+          const res = await axios.get('http://10.4.1.43:5000/api/users', {
+            headers: { 'x-auth-token': token }
+          });
           setUsers(res.data);
-        } else {
-          setUsers([]);
-          console.warn('API response is not an array:', res.data);
+        } catch (err) {
+          console.error('Error fetching users:', err);
+          if (err.response?.status === 401) {
+            localStorage.removeItem('token');
+          }
         }
-      } catch (err) {
-        console.error('Error fetching users:', err.response?.data || err.message);
-        setError('Failed to load users. Check your connection or token.');
-        if (err.response?.status === 401) {
-          localStorage.removeItem('token');
-        }
-      }
-    };
-    fetchUsers();
+      };
+      fetchUsers();
+    }
   }, [token]);
 
   const handleSearch = (e) => {
@@ -43,7 +39,6 @@ const HomePage = () => {
   const handleLogin = () => navigate('/login');
   const handleSignup = () => navigate('/signup');
   const handleSwapRequest = () => navigate('/swap-request');
-  const handleProfile = () => navigate('/profile');
 
   return (
     <div style={{ backgroundColor: '#FFFFFF', padding: '15px', minHeight: '100vh', color: '#333333' }}>
@@ -73,72 +68,53 @@ const HomePage = () => {
             onFocus={(e) => (e.target.style.borderColor = '#0073B1')}
             onBlur={(e) => (e.target.style.borderColor = '#D1D5DB')}
           />
-          {token ? (
-            <div
-              onClick={handleProfile}
-              style={{
-                backgroundColor: '#D1D5DB',
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                marginRight: '10px',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-              }}
-              onMouseOver={(e) => (e.target.style.transform = 'scale(1.1)')}
-              onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
-            ></div> // Profile Icon Placeholder
-          ) : (
-            <>
-              <button
-                onClick={handleLogin}
-                style={{
-                  backgroundColor: '#0073B1',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  padding: '10px 15px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  marginRight: '10px',
-                  transition: 'background-color 0.3s, transform 0.2s',
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.backgroundColor = '#005F99';
-                  e.target.style.transform = 'scale(1.05)';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.backgroundColor = '#0073B1';
-                  e.target.style.transform = 'scale(1)';
-                }}
-              >
-                Login
-              </button>
-              <button
-                onClick={handleSignup}
-                style={{
-                  backgroundColor: '#0073B1',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  padding: '10px 15px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  transition: 'background-color 0.3s, transform 0.2s',
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.backgroundColor = '#005F99';
-                  e.target.style.transform = 'scale(1.05)';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.backgroundColor = '#0073B1';
-                  e.target.style.transform = 'scale(1)';
-                }}
-              >
-                Signup
-              </button>
-            </>
-          )}
+          <button
+            onClick={handleLogin}
+            style={{
+              backgroundColor: '#0073B1',
+              color: '#FFFFFF',
+              border: 'none',
+              padding: '10px 15px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              marginRight: '10px',
+              transition: 'background-color 0.3s, transform 0.2s',
+            }}
+            onMouseOver={(e) => {
+              e.target.style.backgroundColor = '#005F99';
+              e.target.style.transform = 'scale(1.05)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.backgroundColor = '#0073B1';
+              e.target.style.transform = 'scale(1)';
+            }}
+          >
+            Login
+          </button>
+          <button
+            onClick={handleSignup}
+            style={{
+              backgroundColor: '#0073B1',
+              color: '#FFFFFF',
+              border: 'none',
+              padding: '10px 15px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: 'background-color 0.3s, transform 0.2s',
+            }}
+            onMouseOver={(e) => {
+              e.target.style.backgroundColor = '#005F99';
+              e.target.style.transform = 'scale(1.05)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.backgroundColor = '#0073B1';
+              e.target.style.transform = 'scale(1)';
+            }}
+          >
+            Signup
+          </button>
         </div>
       </header>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
@@ -196,11 +172,7 @@ const HomePage = () => {
             </button>
           </div>
         ))}
-        {filteredUsers.length === 0 && (
-          <p style={{ color: '#666666', textAlign: 'center', fontSize: '16px', padding: '20px' }}>
-            {error || 'No users found.'}
-          </p>
-        )}
+        {filteredUsers.length === 0 && <p style={{ color: '#666666', textAlign: 'center', fontSize: '16px', padding: '20px' }}>No users found.</p>}
       </div>
       {token && (
         <button
