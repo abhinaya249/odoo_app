@@ -41,4 +41,29 @@ router.put('/profile', auth, async (req, res) => {
   }
 });
 
+router.post('/:id/feedback', auth, async (req, res) => {
+  const { feedback, rating } = req.body;
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+
+    user.rating = (user.rating * (user.feedbackCount || 0) + rating) / ((user.feedbackCount || 0) + 1);
+    user.feedbackCount = (user.feedbackCount || 0) + 1;
+    await user.save();
+    res.json({ msg: 'Feedback recorded' });
+  } catch (err) {
+    res.status(500).send('Server error');
+  }
+});
+
+router.get('/:id', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user || !user.isPublic) return res.status(404).json({ msg: 'User not found or profile is private' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).send('Server error');
+  }
+});
+
 module.exports = router;

@@ -44,11 +44,24 @@ router.put('/:id', auth, async (req, res) => {
   try {
     const request = await SwapRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ msg: 'Request not found' });
-    if (request.recipient.toString() !== req.user.id) return res.status(401).json({ msg: 'Not authorized' });
+    if (request.recipient.toString() !== req.user.id && request.requester.toString() !== req.user.id) return res.status(401).json({ msg: 'Not authorized' });
 
     request.status = status;
     await request.save();
     res.json(request);
+  } catch (err) {
+    res.status(500).send('Server error');
+  }
+});
+
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const request = await SwapRequest.findById(req.params.id);
+    if (!request) return res.status(404).json({ msg: 'Request not found' });
+    if (request.requester.toString() !== req.user.id) return res.status(401).json({ msg: 'Not authorized' });
+
+    await request.deleteOne();
+    res.json({ msg: 'Request deleted' });
   } catch (err) {
     res.status(500).send('Server error');
   }

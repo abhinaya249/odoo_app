@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema({
   skillsWanted: [String],
   rating: { type: Number, default: 0 },
   profilePhoto: String,
-  isPublic: { type: Boolean, default: true }
+  isPublic: { type: Boolean, default: true },
+  feedbackCount: { type: Number, default: 0 }
 });
 
 module.exports = mongoose.model('User', userSchema);
